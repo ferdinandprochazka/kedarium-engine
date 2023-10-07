@@ -9,8 +9,8 @@ namespace kdr
   namespace Graphics
   {
     /**
-   * Represents an OpenGL shader program.
-   */
+     * Represents an OpenGL shader program.
+     */
     class Shader
     {
       public:
@@ -43,8 +43,8 @@ namespace kdr
     };
 
     /**
-   * Represents a Vertex Buffer Object (VBO) used in OpenGL rendering.
-   */
+     * Represents a Vertex Buffer Object (VBO) used in OpenGL rendering.
+     */
     class VBO
     {
       public:
@@ -73,6 +73,44 @@ namespace kdr
         void Unbind();
         /**
          * Deletes the VBO, releasing its resources.
+         */
+        void Delete();
+
+      private:
+        GLuint ID;
+    };
+
+    /**
+     * Represents an Element Buffer Object (EBO) used in OpenGL rendering.
+     */
+    class EBO
+    {
+      public:
+        /**
+         * Constructor for creating an EBO.
+         * 
+         * @param indices A pointer to an array of GLuint containing indices.
+         * @param size The size in bytes of the index data.
+         */
+        EBO(GLuint* indices, GLsizeiptr size);
+
+        /**
+         * Gets the ID of the EBO.
+         * 
+         * @return The ID of the EBO.
+         */
+        const GLuint getID() const;
+
+        /**
+         * Binds the EBO for use.
+         */
+        void Bind();
+        /**
+         * Unbinds the currently bound EBO.
+         */
+        void Unbind();
+        /**
+         * Deletes the EBO, releasing its resources.
          */
         void Delete();
 

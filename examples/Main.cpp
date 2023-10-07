@@ -87,12 +87,12 @@ int main()
   // VAO, VBO, and EBO
   GLuint VAO;
   kdr::Graphics::VBO VBO1(vertices, sizeof(vertices));
-  GLuint EBO;
+  kdr::Graphics::EBO EBO1(indices, sizeof(indices));
 
   glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &EBO);
 
   glBindVertexArray(VAO);
+  EBO1.Bind();
   VBO1.Bind();
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
@@ -100,12 +100,9 @@ int main()
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
   glBindVertexArray(0);
   VBO1.Unbind();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  EBO1.Unbind();
 
   // Main Loop
   while (!glfwWindowShouldClose(window))
@@ -120,7 +117,7 @@ int main()
 
   glDeleteVertexArrays(1, &VAO);
   VBO1.Delete();
-  glDeleteBuffers(1, &EBO);
+  EBO1.Delete();
   defaultShader.Delete();
   glfwDestroyWindow(window);
   glfwTerminate();
