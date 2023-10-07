@@ -13,8 +13,12 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
-# Subdirectories
-add_subdirectory(examples)
-
 # CXX Standard
 set(CXX_STANDARD_REQUIRED 11)
+
+# Include Directory
+include_directories(include)
+
+# Subdirectories
+add_subdirectory(src)
+add_subdirectory(examples)
