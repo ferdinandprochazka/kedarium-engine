@@ -125,3 +125,36 @@ void kdr::Graphics::EBO::Delete()
 {
   glDeleteBuffers(1, &this->ID);
 }
+
+kdr::Graphics::VAO::VAO()
+{
+  glGenVertexArrays(1, &this->ID);
+}
+
+const GLuint kdr::Graphics::VAO::getID() const
+{
+  return this->ID;
+}
+
+void kdr::Graphics::VAO::LinkAttrib(kdr::Graphics::VBO& VBO, GLuint layout, GLint size, GLenum type, GLsizei stride, const void* offset)
+{
+  VBO.Bind();
+  glVertexAttribPointer(layout, size, type, GL_FALSE, stride, offset);
+  glEnableVertexAttribArray(layout);
+  VBO.Unbind();
+}
+
+void kdr::Graphics::VAO::Bind()
+{
+  glBindVertexArray(this->ID);
+}
+
+void kdr::Graphics::VAO::Unbind()
+{
+  glBindVertexArray(0);
+}
+
+void kdr::Graphics::VAO::Delete()
+{
+  glDeleteVertexArrays(1, &this->ID);
+}
