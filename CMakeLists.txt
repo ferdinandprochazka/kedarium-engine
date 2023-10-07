@@ -22,3 +22,6 @@ include_directories(include)
 # Subdirectories
 add_subdirectory(src)
 add_subdirectory(examples)
+
+# Copy Resource Files
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})

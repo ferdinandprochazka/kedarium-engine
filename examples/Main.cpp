@@ -5,6 +5,7 @@
 
 #include "Kedarium/Core.hpp"
 #include "Kedarium/Colors.hpp"
+#include "Kedarium/File.hpp"
 
 // Constants
 const unsigned int WINDOW_WIDTH  = 800;
@@ -63,6 +64,58 @@ int main()
   // Info Logs
   kdr::Core::printEngineInfo();
   kdr::Core::printVersionInfo();
+
+  // Fragment and Vertex Shaders
+  const std::string vertexShaderSource = kdr::File::getContents("resources/Shaders/default.vert");
+  const std::string fragmentShaderSource = kdr::File::getContents("resources/Shaders/default.frag");
+
+  const char* vertexShaderSourceC = vertexShaderSource.c_str();
+  const char* fragmentShaderSourceC = fragmentShaderSource.c_str();
+
+  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+  glShaderSource(vertexShader, 1, &vertexShaderSourceC, NULL);
+  glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, NULL);
+
+  glCompileShader(vertexShader);
+  glCompileShader(fragmentShader);
+
+  char infoLog[512];
+  int success;
+
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  if (!success)
+  {
+    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+    std::cerr << "Failed to compile the vertex shader!\n";
+    std::cerr << "Error: " << infoLog << '\n';
+  }
+
+  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+  if (!success)
+  {
+    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+    std::cerr << "Failed to compile the fragment shader ()!\n";
+    std::cerr << "Error: " << infoLog << '\n';
+  }
+
+  GLuint shaderProgram = glCreateProgram();
+
+  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, fragmentShader);
+  glLinkProgram(shaderProgram);
+
+  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+  if (!success)
+  {
+    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+    std::cerr << "Failed to link the shader program!\n";
+    std::cerr << "Error: " << infoLog << '\n';
+  }
+
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
 
   // Main Loop
   while (!glfwWindowShouldClose(window))
