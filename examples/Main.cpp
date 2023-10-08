@@ -4,11 +4,11 @@
 #include <iostream>
 
 #include "Kedarium/Core.hpp"
+#include "Kedarium/Window.hpp"
 #include "Kedarium/Colors.hpp"
 #include "Kedarium/Graphics.hpp"
 
 // Constants
-
 const unsigned int WINDOW_WIDTH  = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 const std::string  WINDOW_TITLE  = "Kedarium Engine";
@@ -28,40 +28,73 @@ GLuint indices[] = {
   3, 4, 5,
 };
 
+class MyWindow : public kdr::Window
+{
+  public:
+    MyWindow(const kdr::WindowProps& windowProps) : kdr::Window(windowProps)
+    {
+      // Shader
+      this->defaultShader = new kdr::Graphics::Shader(
+        "resources/Shaders/default.vert",
+        "resources/Shaders/default.frag"
+      );
+      
+      // VAO, VBO, and EBO
+      this->VAO1 = new kdr::Graphics::VAO();
+      this->VBO1 = new kdr::Graphics::VBO(vertices, sizeof(vertices));
+      this->EBO1 = new kdr::Graphics::EBO(indices, sizeof(indices));
+
+      this->VAO1->Bind();
+      this->EBO1->Bind();
+      this->VBO1->Bind();
+
+      this->VAO1->LinkAttrib(*this->VBO1, 0, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void*)0);
+      this->VAO1->LinkAttrib(*this->VBO1, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+      this->VAO1->Unbind();
+      this->VBO1->Unbind();
+      this->EBO1->Unbind();
+    }
+
+    ~MyWindow()
+    {
+      this->defaultShader->Delete();
+      this->VAO1->Delete();
+      this->VBO1->Delete();
+      this->EBO1->Delete();
+
+      delete this->defaultShader;
+      delete this->VAO1;
+      delete this->VBO1;
+      delete this->EBO1;
+    }
+
+    void update(){}
+
+    void render()
+    {
+      this->defaultShader->Use();
+      this->VAO1->Bind();
+      glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, NULL);
+    }
+
+  private:
+    kdr::Graphics::Shader* defaultShader;
+
+    kdr::Graphics::VAO* VAO1;
+    kdr::Graphics::VBO* VBO1;
+    kdr::Graphics::EBO* EBO1;
+};
+
 int main()
 {
-  // Initializing GLFW
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  // Creating the GLFW Window
-  GLFWwindow* window = glfwCreateWindow(
+  // Window
+  kdr::WindowProps windowProps = kdr::WindowProps(
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
-    WINDOW_TITLE.c_str(),
-    NULL,
-    NULL
+    WINDOW_TITLE
   );
-
-  if (window == NULL)
-  {
-    std::cerr << "Failed to create a GLFW Window!\n";
-    glfwTerminate();
-    return 1;
-  }
-  glfwMakeContextCurrent(window);
-
-  // Initializing GLEW
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
-    std::cerr << "Failed to initialize GLEW!\n";
-    std::cerr << "Error: " << glewGetErrorString(err) << '\n';
-    glfwTerminate();
-    return 1;
-  }
+  MyWindow myWindow(windowProps);
 
   // Clear Color
   kdr::Colors::RGBA clearColor = kdr::Colors::RGBA(
@@ -70,53 +103,15 @@ int main()
     0.3,
     1.f
   );
-  glClearColor(
-    clearColor.red,
-    clearColor.green,
-    clearColor.blue,
-    clearColor.alpha
-  );
+  myWindow.setClearColor(clearColor);
 
   // Info Logs
   kdr::Core::printEngineInfo();
   kdr::Core::printVersionInfo();
 
-  // Shaders
-  kdr::Graphics::Shader defaultShader("resources/Shaders/default.vert", "resources/Shaders/default.frag");
-
-  // VAO, VBO, and EBO
-  kdr::Graphics::VAO VAO1;
-  kdr::Graphics::VBO VBO1(vertices, sizeof(vertices));
-  kdr::Graphics::EBO EBO1(indices, sizeof(indices));
-
-  VAO1.Bind();
-  EBO1.Bind();
-  VBO1.Bind();
-
-  VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void*)0);
-  VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-
-  VAO1.Unbind();
-  VBO1.Unbind();
-  EBO1.Unbind();
-
   // Main Loop
-  while (!glfwWindowShouldClose(window))
-  {
-    glfwPollEvents();
-    glClear(GL_COLOR_BUFFER_BIT);
-    defaultShader.Use();
-    VAO1.Bind();
-    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, NULL);
-    glfwSwapBuffers(window);
-  }
+  myWindow.loop();
+  myWindow.close();
 
-  VAO1.Delete();
-  VBO1.Delete();
-  EBO1.Delete();
-  defaultShader.Delete();
-
-  glfwDestroyWindow(window);
-  glfwTerminate();
   return 0;
 }
